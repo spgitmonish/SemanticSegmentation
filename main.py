@@ -28,7 +28,6 @@ def load_vgg(sess, vgg_path):
     # Load the model and weights(using the session and tag)
     # from the given path(vgg_path)
     vgg_model = tf.saved_model.loader.load(sess, [vgg_tag], vgg_path)
-    vgg_model.summary()
 
     # These tensors names are used for creating a FCN(Fully Convolutional Network)
     vgg_input_tensor_name = 'image_input:0'
@@ -41,15 +40,15 @@ def load_vgg(sess, vgg_path):
     vgg_graph = tf.get_default_graph()
 
     # Input tensor
-    vgg_input_tensor = vgg.get_tensor_by_name(vgg_input_tensor_name)
+    vgg_input_tensor = vgg_graph.get_tensor_by_name(vgg_input_tensor_name)
     # Dropout layer tensor
-    vgg_keep_prob_tensor = vgg.get_tensor_by_name(vgg_keep_prob_tensor_name)
+    vgg_keep_prob_tensor = vgg_graph.get_tensor_by_name(vgg_keep_prob_tensor_name)
     # Output of pool layer 3
-    vgg_layer3_out_tensor = vgg.get_tensor_by_name(vgg_layer3_out_tensor_name)
+    vgg_layer3_out_tensor = vgg_graph.get_tensor_by_name(vgg_layer3_out_tensor_name)
     # Output of pool layer 4
-    vgg_layer4_out_tensor = vgg.get_tensor_by_name(vgg_layer4_out_tensor_name)
+    vgg_layer4_out_tensor = vgg_graph.get_tensor_by_name(vgg_layer4_out_tensor_name)
     # Output of layer 7
-    vgg_layer7_out_tensor = vgg.get_tensor_by_name(vgg_layer7_out_tensor_name)
+    vgg_layer7_out_tensor = vgg_graph.get_tensor_by_name(vgg_layer7_out_tensor_name)
 
     # Return a tuple of tensors from this function
     return vgg_input_tensor, vgg_keep_prob_tensor, vgg_layer3_out_tensor, vgg_layer4_out_tensor, vgg_layer7_out_tensor
@@ -67,8 +66,8 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # Build FCN-8 decoder using upsampling and adding skip connections
     # First make sure that the output shape is same(apply 1x1 convolution)
     vgg_layer7_logits = tf.layers.conv2d(vgg_layer7_out, num_classes, kernel_size=1, name='vgg_layer7_logits')
-    vgg_layer4_logits = tf.layers.conv2d(vgg_layer4_out, num_classes, kernel_size=1, name='vgg_layer7_logits')
-    vgg_layer3_logits = tf.layers.conv2d(vgg_layer3_out, num_classes, kernel_size=1, name='vgg_layer7_logits')
+    vgg_layer4_logits = tf.layers.conv2d(vgg_layer4_out, num_classes, kernel_size=1, name='vgg_layer4_logits')
+    vgg_layer3_logits = tf.layers.conv2d(vgg_layer3_out, num_classes, kernel_size=1, name='vgg_layer3_logits')
 
     # Upsample the output of 1x1 convolution output(start of the decoding process)
     fcn_1 = tf.layers.conv2d_transpose(vgg_layer7_logits, num_classes, kernel_size=4, strides=(2, 2), padding='same', name='fcn_1')
@@ -83,7 +82,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     fcn_4 = tf.add(fcn_1, vgg_layer4_logits, name='fcn_2')
 
     # Final decoder output after last upsampling
-    fcn_output = tf.layers.conv2d_transpose(fcn_decoder_layer4, num_classes, kernel_size=16, strides=(8, 8), padding='same', name='fcn_output')
+    fcn_output = tf.layers.conv2d_transpose(fcn_4, num_classes, kernel_size=16, strides=(8, 8), padding='same', name='fcn_output')
 
     # Return the output tensor(decoder output)
     return fcn_output
@@ -133,7 +132,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
     sess.run(tf.global_variables_initializer())
 
     # Run for a certain number of epochs
-    for epoch in epochs:
+    for epoch in range(epochs):
         print("Epoch: ", epoch)
 
         # Train on batches(1 image)
@@ -229,9 +228,8 @@ def run():
         logits, optimizer, cross_entropy_loss = optimize(fcn_output, correct_label, learning_rate, num_classes)
 
         # Train NN using the train_nn function
-        train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
-                 cross_entropy_loss, vgg_input, correct_label, keep_prob,
-                 lr, runs_dir, data_dir, image_shape, logits)
+        train_nn(sess, epochs, batch_size, get_batches_fn, optimizer,
+                 cross_entropy_loss, vgg_input, correct_label, keep_prob, lr)
 
         # Save the inference data from the run
         save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
