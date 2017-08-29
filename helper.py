@@ -11,6 +11,9 @@ from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
 
+import time
+import csv
+
 class DLProgress(tqdm):
     last_block = 0
 
@@ -146,7 +149,7 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape,
     # Save the image output
     for name, image in image_outputs:
         scipy.misc.imsave(os.path.join(output_dir, name), image)
-        
+
     # Save the model
     saver = tf.train.Saver()
     filefcn_path = os.path.join(output_dir, 'fcn-{}.ckpt'.format(epoch))
