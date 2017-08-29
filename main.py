@@ -148,39 +148,6 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
         print("Training loss: {}".format(training_loss))
 tests.test_train_nn(train_nn)
 
-def save_inference_samples(runs_dir, data_dir, sess, image_shape,
-                           logits, keep_prob, input_image, epoch):
-    """
-    save model weights and generate samples.
-    :param runs_dir: directory where model weights and samples will be saved
-    :param data_dir: directory where the Kitty dataset is stored
-    :param sess: TF Session
-    :param image_shape: shape of the input image for prediction
-    :param logits: TF Placeholder for the FCN prediction
-    :param keep_prob: TF Placeholder for dropout keep probability
-    :param input_image: TF Placeholder for input images
-    :param epochs: Number of epochs or Final label
-    """
-    # Make folder for current run
-    output_dir = os.path.join(runs_dir, str(time.time()))
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    os.makedirs(output_dir)
-
-    # Run NN on test images and save them to disk
-    print('Epoch {} finished. Saving test images to: {}'.format(epoch, output_dir))
-    image_outputs = helper.gen_test_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'data_road/testing'), image_shape)
-
-    # Save the image output
-    for name, image in image_outputs:
-        scipy.misc.imsave(os.path.join(output_dir, name), image)
-
-    # Save the model
-    saver = tf.train.Saver()
-    filefcn_path = os.path.join(output_dir, 'fcn-{}.ckpt'.format(epoch))
-    save_path = saver.save(sess, filefcn_path)
-    print('Model saved to: {}'.format(filefcn_path))
-
 def run():
     num_classes = 2
     image_shape = (160, 576)

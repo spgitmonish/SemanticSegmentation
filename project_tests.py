@@ -7,7 +7,6 @@ from unittest import mock
 import numpy as np
 import tensorflow as tf
 
-
 def test_safe(func):
     """
     Isolate tests
@@ -20,12 +19,10 @@ def test_safe(func):
 
     return func_wrapper
 
-
 def _prevent_print(function, params):
     sys.stdout = open(os.devnull, "w")
     function(**params)
     sys.stdout = sys.__stdout__
-
 
 def _assert_tensor_shape(tensor, shape, display_name):
     assert tf.assert_rank(tensor, len(shape), message='{} has wrong rank'.format(display_name))
@@ -36,7 +33,6 @@ def _assert_tensor_shape(tensor, shape, display_name):
                        if cor_dim is not None and ten_dim != cor_dim]
     assert not wrong_dimension, \
         '{} has wrong shape.  Found {}'.format(display_name, tensor_shape)
-
 
 class TmpMock(object):
     """
@@ -53,7 +49,6 @@ class TmpMock(object):
 
     def __exit__(self, type, value, traceback):
         setattr(self.module, self.attrib_name, self.original_attrib)
-
 
 @test_safe
 def test_load_vgg(load_vgg, tf_module):
@@ -79,7 +74,6 @@ def test_load_vgg(load_vgg, tf_module):
         assert vgg_layer4_out == test_vgg_layer4_out, 'layer4_out is the wrong object'
         assert vgg_layer7_out == test_vgg_layer7_out, 'layer7_out is the wrong object'
 
-
 @test_safe
 def test_layers(layers):
     num_classes = 2
@@ -89,7 +83,6 @@ def test_layers(layers):
     layers_output = layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes)
 
     _assert_tensor_shape(layers_output, [None, None, None, num_classes], 'Layers Output')
-
 
 @test_safe
 def test_optimize(optimize):
@@ -108,7 +101,6 @@ def test_optimize(optimize):
         test, loss = sess.run([layers_output, cross_entropy_loss], {correct_label: np.arange(np.prod(shape)).reshape(shape)})
 
     assert test.min() != 0 or test.max() != 0, 'Training operation not changing weights.'
-
 
 @test_safe
 def test_train_nn(train_nn):
@@ -138,7 +130,6 @@ def test_train_nn(train_nn):
             'keep_prob': keep_prob,
             'learning_rate': learning_rate}
         _prevent_print(train_nn, parameters)
-
 
 @test_safe
 def test_for_kitti_dataset(data_dir):
