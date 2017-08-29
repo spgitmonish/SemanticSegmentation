@@ -79,7 +79,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     fcn_3 = tf.layers.conv2d_transpose(fcn_2, num_classes, kernel_size=4, strides=(2, 2), padding='same', name='fcn_3')
 
     # Add skip connection from the output of pool layer 3 of VGG
-    fcn_4 = tf.add(fcn_1, vgg_layer4_logits, name='fcn_2')
+    fcn_4 = tf.add(fcn_3, vgg_layer3_logits, name='fcn_2')
 
     # Final decoder output after last upsampling
     fcn_output = tf.layers.conv2d_transpose(fcn_4, num_classes, kernel_size=16, strides=(8, 8), padding='same', name='fcn_output')
