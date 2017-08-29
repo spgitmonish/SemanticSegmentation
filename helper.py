@@ -144,7 +144,7 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape,
 
     # Run NN on test images and save them to disk
     print('Epoch {} finished. Saving test images to: {}'.format(epoch, output_dir))
-    image_outputs = helper.gen_test_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'data_road/testing'), image_shape)
+    image_outputs = gen_test_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'data_road/testing'), image_shape)
 
     # Save the image output
     for name, image in image_outputs:

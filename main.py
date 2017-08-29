@@ -4,6 +4,7 @@ import helper
 import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
+from helper import *
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
@@ -64,9 +65,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # Freeze training of layers in VGG-16
-    '''vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
+    vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
     vgg_layer4_out = tf.stop_gradient(vgg_layer4_out)
-    vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)'''
+    vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)
 
     # Build FCN-8 decoder using upsampling and adding skip connections
     # First make sure that the output shape is same(apply 1x1 convolution)
@@ -133,6 +134,9 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
     """
+    # To keep track of epoch time
+    t = time.time()
+
     # Initialize all the global variables
     sess.run(tf.global_variables_initializer())
 
@@ -151,6 +155,9 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
         # Calculate training loss
         training_loss /= training_samples
         print("Training loss: {}".format(training_loss))
+        
+        # Print time taken
+        print("Time: %.3f seconds" % (time.time() - t))
 tests.test_train_nn(train_nn)
 
 def run():
@@ -168,7 +175,7 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 25
+    epochs = 1
     batch_size = 1
     lr = 0.0001
     learning_rate = tf.constant(lr)
