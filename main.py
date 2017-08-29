@@ -134,15 +134,13 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
     """
-    # To keep track of epoch time
-    t = time.time()
-
     # Initialize all the global variables
     sess.run(tf.global_variables_initializer())
 
     # Run for a certain number of epochs
     for epoch in range(epochs):
         print("Epoch: ", epoch)
+        t = time.time()
 
         # Train on batches(1 image)
         training_loss = 0
@@ -175,9 +173,9 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 1
+    epochs = 100
     batch_size = 1
-    lr = 0.0001
+    lr = 0.0005
     learning_rate = tf.constant(lr)
 
     # Download the VGG-16 model if it doesn't exist
