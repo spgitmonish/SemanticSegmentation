@@ -105,3 +105,4 @@ RUNS/
 # Floyd
 .floydexpt
 .floydignore
+.floyddata
