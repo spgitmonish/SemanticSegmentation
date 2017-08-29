@@ -100,9 +100,10 @@ ENV/
 # mypy
 .mypy_cache/
 
-RUNS/
+# Ignore runs folder
+runs/
 
 # Floyd
 .floydexpt
 .floydignore
-.floyddata
+.floyd
