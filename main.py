@@ -4,6 +4,8 @@ import helper
 import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
+import time
+import csv
 
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
