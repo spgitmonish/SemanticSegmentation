@@ -175,7 +175,7 @@ def run():
     # Hyperparameters for training
     epochs = 100
     batch_size = 1
-    lr = 0.0005
+    lr = 0.0001
     learning_rate = tf.constant(lr)
 
     # Download the VGG-16 model if it doesn't exist
