@@ -146,7 +146,7 @@ def train_nn(sess, epochs, batch_size,
         print("Epoch: ", epoch)
         t = time.time()
 
-        # Train on batches(1 image)
+        # Train on batches
         training_loss = 0
         training_samples = 0
         for X, y in get_training_batches_fn(batch_size):
@@ -157,7 +157,7 @@ def train_nn(sess, epochs, batch_size,
         # Calculate training loss
         training_loss /= training_samples
 
-        # Validation on batches(1 image)
+        # Validation on batches
         validation_loss = 0
         validation_samples = 0
         for X, y in get_validation_batches_fn(batch_size):
@@ -169,7 +169,7 @@ def train_nn(sess, epochs, batch_size,
         validation_loss /= validation_samples
 
         # Print out the stats
-        print("Training loss: {}".format(training_loss) + "Validation: {}".format(validation_loss))
+        print("Training loss: {}".format(training_loss) + "Validation loss: {}".format(validation_loss))
 
         # Print time taken
         print("Time: %.3f seconds" % (time.time() - t))
