@@ -103,19 +103,37 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :param num_classes: Number of classes to classify
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
-    # Reshape the 4D output and label tensors to 2D:
+    # Reshape the 4D(batch_size x h x w x channels) output and label tensors to 2D
     # Each row represents a pixel and each column a class.
     logits = tf.reshape(nn_last_layer, (-1, num_classes))
     y = tf.reshape(correct_label, (-1, num_classes))
 
     # Define a loss function(softmax with logits and cross entropy)
-    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y))
+    # NOTE: This is pixelwise entropy loss for each class
+    #cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y))
 
-    # Use an optimizer for reducing loss(Using Adam optimizer)
-    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_loss)
+    # Define loss as a function of mIoU(Intersection over Union)
+    '''# 1. Intersection of pixels of predicted output and expected output
+    sec_meantion = tf.reduce_sum(tf.multiply(logits, y))
+
+    # 2. Union of pixels of predicted output and expected output
+    union = tf.reduce_sum(tf.subtract(tf.add(logits, y), tf.multiply(logits, y)))
+
+    # 3. Intersection over Union(IoU)
+    iou = tf.div(intersection, union)
+
+    # 4. Loss = 1.0 - IoU
+    iou_loss = tf.subtract(tf.constant(1.0, dtype = tf.float32), iou)'''
+    mean_iou = tf.metrics.mean_iou(logits, y, num_classes)
+    mean_iou_loss = tf.subtract(tf.constant(1.0, dtype = tf.float32), mean_iou)
+
+    # Use an optimizer for reducing loss(Using Adam optimizer) i.e. increase mIoU
+    #optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_loss)
+    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(mean_iou_loss)
 
     # Return the result
-    return logits, optimizer, cross_entropy_loss
+    #return logits, optimizer, cross_entropy_loss
+    return logits, optimizer, mean_iou_loss
 tests.test_optimize(optimize)
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
@@ -173,9 +191,9 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 100
-    batch_size = 5
-    lr = 0.00001
+    epochs = 75
+    batch_size = 1
+    lr = 0.0001
     learning_rate = tf.constant(lr)
 
     # Download the VGG-16 model if it doesn't exist
