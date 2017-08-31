@@ -7,12 +7,13 @@ import shutil
 import zipfile
 import time
 import tensorflow as tf
+import time
+import csv
+import cv2
+
 from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
-
-import time
-import csv
 
 class DLProgress(tqdm):
     last_block = 0
@@ -98,16 +99,15 @@ def gen_batch_function(data_folder, image_shape):
                 x_translate = np.random.uniform(-40, 40)
                 y_translate = np.random.uniform(-40, 40)
                 translate_matrix = np.float32([[1, 0, x_translate],[0, 1, y_translate]])
-                image = cv2.warpAffine(image, translate_matrix, image_shape[1], image_shape[0])
-                gt_image = cv2.warpAffine(gt_image, translate_matrix, image_shape[1], image_shape[0])
+                image = cv2.warpAffine(image, translate_matrix, (image_shape[1], image_shape[0]))
+		# NOTE: Both the images(original and ground truth) have the same shape
+                gt_image = cv2.warpAffine(gt_image, translate_matrix, (image_shape[1], image_shape[0]))
 
                 # Add random luminance changes
                 # NOTE: Only the original image is converted from RGB->HLS and back
-                hls = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_RGB2HLS)
-                h, l, s = cv2.split(hls)
-                l *= 0.25 + np.random.uniform(0.25, 0.75)
-                hls = cv2.merge((h, l, s))
-                image = cv2.cvtColor(hls.astype(np.uint8), cv2.COLOR_HLS2RGB)
+                image = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_RGB2HLS)
+                image[:,:,1] = image[:,:,1] * (0.25 + np.random.uniform(0.25, 0.75))
+                image = cv2.cvtColor(image, cv2.COLOR_HLS2RGB)
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
                 gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
