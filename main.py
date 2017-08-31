@@ -169,7 +169,7 @@ def train_nn(sess, epochs, batch_size,
         validation_loss /= validation_samples
 
         # Print out the stats
-        print("Training loss: {}".format(training_loss) + "Validation loss: {}".format(validation_loss))
+        print("Training loss: {}".format(training_loss) + " Validation loss: {}".format(validation_loss))
 
         # Print time taken
         print("Time: %.3f seconds" % (time.time() - t))

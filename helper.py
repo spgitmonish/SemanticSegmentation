@@ -111,7 +111,7 @@ def gen_batch_function(image_paths, label_paths, image_shape):
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
 
-                # Add random rotation
+                '''# Add random rotation
                 angle_to_rotate = np.random.uniform(-30, 30)
                 image = scipy.misc.imrotate(image, angle_to_rotate)
                 gt_image = scipy.misc.imrotate(gt_image, angle_to_rotate)
@@ -123,7 +123,7 @@ def gen_batch_function(image_paths, label_paths, image_shape):
                 translate_matrix = np.float32([[1, 0, x_translate],[0, 1, y_translate]])
                 image = cv2.warpAffine(image, translate_matrix, (image_shape[1], image_shape[0]))
 		        # NOTE: Both the images(original and ground truth) have the same shape
-                gt_image = cv2.warpAffine(gt_image, translate_matrix, (image_shape[1], image_shape[0]))
+                gt_image = cv2.warpAffine(gt_image, translate_matrix, (image_shape[1], image_shape[0]))'''
 
                 # Add histogram equalization along the 'Y' channel of a YUV image
                 # NOTE: This is supposed to help remove shadows in the image
