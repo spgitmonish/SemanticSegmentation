@@ -59,7 +59,36 @@ def maybe_download_pretrained_vgg(data_dir):
         # Remove zip file to save space
         os.remove(os.path.join(vgg_path, vgg_filename))
 
-def gen_batch_function(data_folder, image_shape):
+ def load_data(self, data_dir, validation_fraction):
+    """
+    Load the data and and return the sets which have paths to validation and training
+    :param data_dir: Path to folder that contains all the datasets
+    :param validation_fraction: Fraction to store for validation
+    """
+    images = data_dir + '/training/image_2/*.png'
+    labels = data_dir + '/training/gt_image_2/*_road_*.png'
+
+    # Get all the image and label paths
+    image_paths = glob(images)
+    label_paths = {
+        os.path.basename(path).replace('_road_', '_'): path
+        for path in glob(labels)}
+    self.label_paths = label_paths
+
+    # Check if there is an image folder
+    num_images = len(image_paths)
+    if num_images == 0:
+        raise RuntimeError('No data files found in ' + data_dir)
+
+    # Randomly shuffle before setting up the validation and training sets
+    random.shuffle(image_paths)
+    validation_images = image_paths[:int(validation_fraction*num_images)]
+    training_images = image_paths[int(validation_fraction*num_images):]
+
+    # Return the array of paths to images for validation and training sets
+    return validation_images, training_images
+
+def gen_batch_function(image_paths, image_shape):
     """
     Generate function to create batches of training data
     :param data_folder: Path to folder that contains all the datasets
@@ -72,13 +101,9 @@ def gen_batch_function(data_folder, image_shape):
         :param batch_size: Batch Size
         :return: Batches of training data
         """
-        image_paths = glob(os.path.join(data_folder, 'image_2', '*.png'))
-        label_paths = {
-            re.sub(r'_(lane|road)_', '_', os.path.basename(path)): path
-            for path in glob(os.path.join(data_folder, 'gt_image_2', '*_road_*.png'))}
-        background_color = np.array([255, 0, 0])
-
+        # Randomly shuffle the images in the folder
         random.shuffle(image_paths)
+
         for batch_i in range(0, len(image_paths), batch_size):
             images = []
             gt_images = []
