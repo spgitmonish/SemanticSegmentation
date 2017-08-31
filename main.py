@@ -162,8 +162,8 @@ def train_nn(sess, epochs, batch_size,
         validation_samples = 0
         for X, y in get_validation_batches_fn(batch_size):
             validation_samples += len(X)
-            loss, _ = sess.run([cross_entropy_loss], feed_dict={input_image: X, correct_label: y, keep_prob: 1.0})
-            training_loss += loss
+            loss = sess.run(cross_entropy_loss, feed_dict={input_image: X, correct_label: y, keep_prob: 1.0})
+            validation_loss += loss
 
         # Calculate training loss
         validation_loss /= validation_samples
@@ -203,11 +203,11 @@ def run():
         vgg_path = os.path.join(data_dir, 'vgg')
 
         # Seperate the training image set into training and validation sets
-        validation_path, training_path = load_data(os.path.join(data_dir, 'data_road/training'), 0.1)
+        validation_path, training_path, label_path = load_data(os.path.join(data_dir, 'data_road/training'), 0.1)
 
         # Create function to get batches for validation and training
-        get_validation_batches_fn = helper.gen_batch_function(validation_path, image_shape)
-        get_training_batches_fn = helper.gen_batch_function(training_path, image_shape)
+        get_validation_batches_fn = helper.gen_batch_function(validation_path, label_path, image_shape)
+        get_training_batches_fn = helper.gen_batch_function(training_path, label_path, image_shape)
 
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
