@@ -65,9 +65,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # Freeze training of layers in VGG-16
-    vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
+    '''vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
     vgg_layer4_out = tf.stop_gradient(vgg_layer4_out)
-    vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)
+    vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)'''
 
     # Build FCN-8 decoder using upsampling and adding skip connections
     # First make sure that the output shape is same(apply 1x1 convolution)
