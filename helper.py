@@ -84,8 +84,30 @@ def gen_batch_function(data_folder, image_shape):
             for image_file in image_paths[batch_i:batch_i+batch_size]:
                 gt_image_file = label_paths[os.path.basename(image_file)]
 
+                # Reshape the images(original and ground truth)
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
+
+                # Add random rotation
+                angle_to_rotate = np.random.uniform(-30, 30)
+                image = scipy.misc.imrotate(image, angle_to_rotate)
+                gt_image = scipy.misc.imrotate(gt_image, angle_to_rotate)
+
+                # Add random translation
+                # NOTE: image_shape[1] = width and image_shape[0] = height
+                x_translate = np.random.uniform(-40, 40)
+                y_translate = np.random.uniform(-40, 40)
+                translate_matrix = np.float32([[1, 0, x_translate],[0, 1, y_translate]])
+                image = cv2.warpAffine(image, translate_matrix, image_shape[1], image_shape[0])
+                gt_image = cv2.warpAffine(gt_image, translate_matrix, image_shape[1], image_shape[0])
+
+                # Add random luminance changes
+                # NOTE: Only the original image is converted from RGB->HLS and back
+                hls = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_RGB2HLS)
+                h, l, s = cv2.split(hls)
+                l *= 0.25 + np.random.uniform(0.25, 0.75)
+                hls = cv2.merge((h, l, s))
+                image = cv2.cvtColor(hls.astype(np.uint8), cv2.COLOR_HLS2RGB)
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
                 gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
