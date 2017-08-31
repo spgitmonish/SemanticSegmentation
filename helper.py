@@ -59,7 +59,7 @@ def maybe_download_pretrained_vgg(data_dir):
         # Remove zip file to save space
         os.remove(os.path.join(vgg_path, vgg_filename))
 
- def load_data(self, data_dir, validation_fraction):
+def load_data(self, data_dir, validation_fraction):
     """
     Load the data and and return the sets which have paths to validation and training
     :param data_dir: Path to folder that contains all the datasets
