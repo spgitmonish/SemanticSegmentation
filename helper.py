@@ -109,12 +109,6 @@ def gen_batch_function(data_folder, image_shape):
                 image_yuv[:,:,0] = cv2.equalizeHist(image_yuv[:,:,0])
                 image = cv2.cvtColor(image_yuv, cv2.COLOR_YUV2RGB)
 
-                # Add random luminance changes
-                # NOTE: Only the original image is converted from RGB->HLS and back
-                image = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_RGB2HLS)
-                image[:,:,1] = image[:,:,1] * (0.25 + np.random.uniform(0.25, 0.75))
-                image = cv2.cvtColor(image, cv2.COLOR_HLS2RGB)
-
                 # Array representing the ground truth in boolean form
                 gt_bg = np.all(gt_image == background_color, axis=2)
                 gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
