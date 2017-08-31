@@ -105,7 +105,7 @@ def gen_batch_function(data_folder, image_shape):
 
                 # Add histogram equalization along the 'Y' channel of a YUV image
                 # NOTE: This is supposed to help remove shadows in the image
-                image_yuv = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+                image_yuv = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
                 image_yuv[:,:,0] = cv2.equalizeHist(image_yuv[:,:,0])
                 image = cv2.cvtColor(image_yuv, cv2.COLOR_YUV2RGB)
 
