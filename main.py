@@ -173,7 +173,7 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 100
+    epochs = 150
     batch_size = 5
     lr = 0.0001
     learning_rate = tf.constant(lr)
