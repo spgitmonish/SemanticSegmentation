@@ -151,7 +151,7 @@ def train_nn(sess, epochs, batch_size,
         training_samples = 0
         for X, y in get_training_batches_fn(batch_size):
             training_samples += len(X)
-            loss, _ = sess.run([cross_entropy_loss, train_op], feed_dict={input_image: X, correct_label: y, keep_prob: 0.8})
+            loss, _ = sess.run([cross_entropy_loss, train_op], feed_dict={input_image: X, correct_label: y, keep_prob: 0.5})
             training_loss += loss
 
         # Calculate training loss
@@ -190,7 +190,7 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 50
+    epochs = 75
     batch_size = 5
     lr = 0.0001
     learning_rate = tf.constant(lr)
