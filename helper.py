@@ -14,6 +14,30 @@ import cv2
 from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
+from collections import namedtuple
+
+# NOTE: A named tuple is a tuple which allows access of it's elements by name
+# Named tuple object where each entry has the following:
+# 'class': Name of the class
+# 'colorname': Name of the color associated with the class
+# 'color': Tuple
+Label = namedtuple('Label', ['class_name', 'color_name', 'color_value'])
+
+# List of valid ground truth labels
+# NOTE: Ground truth classes based on: http://adas.cvc.uab.es/s2uad/?page_id=11
+gt_labels = [
+	Label('Sky',		'Grey', 	np.array([128, 128, 128])),
+	Label('Building', 	'Red', 		np.array([128, 0, 0])),
+	Label('Road', 		'Pink', 	np.array([128, 64, 128])),
+	Label('Sidewalk', 	'Blue', 	np.array([0, 0, 192])),
+	Label('Fence', 		'Grey-purple', 	np.array([64, 64, 128])),
+	Label('Vegetation', 	'Dark yellow', 	np.array([128, 128, 0])),
+	Label('Pole', 		'Light yellow', np.array([192, 192, 128])),
+	Label('Car', 		'Purple', 	np.array([64, 0, 128])),
+	Label('Sign', 		'Salmon', 	np.array([192, 128, 128])),
+	Label('Pedestrian', 	'Yellow-brown', np.array([64, 64, 0])),
+	Label('Cyclist', 	'Light blue', 	np.array([0, 128, 192]))
+]
 
 class DLProgress(tqdm):
     last_block = 0
