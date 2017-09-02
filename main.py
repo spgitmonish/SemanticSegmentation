@@ -176,7 +176,7 @@ def train_nn(sess, epochs, batch_size,
 tests.test_train_nn(train_nn)
 
 def run():
-    num_classes = 2
+    num_classes = len(gt_labels)
     image_shape = (160, 576)
     data_dir = './data'
     runs_dir = './runs'
@@ -203,7 +203,7 @@ def run():
         vgg_path = os.path.join(data_dir, 'vgg')
 
         # Seperate the training image set into training and validation sets
-        validation_path, training_path, label_path = load_data(os.path.join(data_dir, 'data_road/training'), 0.1)
+        validation_path, training_path, label_path = load_data(os.path.join(data_dir, 'KITTI_SEMANTIC/Training'), 0.1)
 
         # Create function to get batches for validation and training
         get_validation_batches_fn = helper.gen_batch_function(validation_path, label_path, image_shape)
@@ -231,7 +231,7 @@ def run():
                  cross_entropy_loss, vgg_input, correct_label, keep_prob, lr)
 
         # Save the inference data from the run
-        save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
+        #save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
 
         # OPTIONAL: Apply the trained model to a video
 

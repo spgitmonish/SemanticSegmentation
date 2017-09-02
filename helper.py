@@ -91,8 +91,8 @@ def load_data(data_folder, validation_fraction):
     """
 
     # Get all the image and label paths
-    image_paths = glob(os.path.join(data_folder, 'image_2', '*.png'))
-    label_paths = {re.sub(r'_(lane|road)_', '_', os.path.basename(path)): path for path in glob(os.path.join(data_folder, 'gt_image_2', '*_road_*.png'))}
+    image_paths = glob(os.path.join(data_folder, 'RGB', '*.png'))
+    label_paths = {os.path.basename(path): path for path in glob(os.path.join(data_folder, 'GT', '*.png'))}
 
     # Check if there is an image folder
     num_images = len(image_paths)
@@ -122,8 +122,6 @@ def gen_batch_function(image_paths, label_paths, image_shape):
         """
         # Randomly shuffle the images in the folder
         random.shuffle(image_paths)
-        # Color to detect roads
-        background_color = np.array([255, 0, 0])
 
         for batch_i in range(0, len(image_paths), batch_size):
             images = []
@@ -135,34 +133,33 @@ def gen_batch_function(image_paths, label_paths, image_shape):
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
 
-                '''# Add random rotation
-                angle_to_rotate = np.random.uniform(-30, 30)
-                image = scipy.misc.imrotate(image, angle_to_rotate)
-                gt_image = scipy.misc.imrotate(gt_image, angle_to_rotate)
-
-                # Add random translation
-                # NOTE: image_shape[1] = width and image_shape[0] = height
-                x_translate = np.random.uniform(-40, 40)
-                y_translate = np.random.uniform(-40, 40)
-                translate_matrix = np.float32([[1, 0, x_translate],[0, 1, y_translate]])
-                image = cv2.warpAffine(image, translate_matrix, (image_shape[1], image_shape[0]))
-		        # NOTE: Both the images(original and ground truth) have the same shape
-                gt_image = cv2.warpAffine(gt_image, translate_matrix, (image_shape[1], image_shape[0]))'''
-
                 # Add histogram equalization along the 'Y' channel of a YUV image
                 # NOTE: This is supposed to help remove shadows in the image
                 image_yuv = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
                 image_yuv[:,:,0] = cv2.equalizeHist(image_yuv[:,:,0])
                 image = cv2.cvtColor(image_yuv, cv2.COLOR_YUV2RGB)
-
-                # Array representing the ground truth in boolean form
-                gt_bg = np.all(gt_image == background_color, axis=2)
-                gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
-                gt_image = np.concatenate((gt_bg, np.invert(gt_bg)), axis=2)
-
+                
+                # For composing the boolean representation of each ground truth label
+                gt_bg = np.zeros([image_shape[0], image_shape[1]], dtype=bool)
+                gt_labels_list = []
+		
+                # Go through all the ground truth label colors and 
+                # ground truth images for comparison
+                for label in gt_labels[1:]:
+                        # Array representing the ground truth in boolean form
+                        gt_current = np.all(gt_image == label.color_value, axis=2)
+                        gt_bg |= gt_current
+                        gt_labels_list.append(gt_current)
+					
+                # Final composition of the ground truth
+                gt_bg = ~gt_bg
+                # Stack the ground truth corresponding to the labels along the 3rd dimension
+                # NOTE: The *operator is for unpacking 
+                gt_all = np.dstack([gt_bg, *gt_labels_list])
+                
                 # Append the original images and the ground truth labels
                 images.append(image)
-                gt_images.append(gt_image)
+                gt_images.append(gt_all)
 
             yield np.array(images), np.array(gt_images)
     return get_batches_fn
@@ -178,7 +175,7 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
     :param image_shape: Tuple - Shape of image
     :return: Output for for each test image
     """
-    for image_file in glob(os.path.join(data_folder, 'image_2', '*.png')):
+    for image_file in glob(os.path.join(data_folder, 'RGB', '*.png')):
         # Resize the image to the input image size
         image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
 
@@ -215,7 +212,7 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape,
 
     # Run NN on test images and save them to disk
     print('Epoch {} finished. Saving test images to: {}'.format(epoch, output_dir))
-    image_outputs = gen_test_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'data_road/testing'), image_shape)
+    image_outputs = gen_test_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'KITTI_SEMANTIC/Testing'), image_shape)
 
     # Save the image output
     for name, image in image_outputs:

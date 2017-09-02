@@ -138,13 +138,13 @@ def test_train_nn(train_nn):
 
 @test_safe
 def test_for_kitti_dataset(data_dir):
-    kitti_dataset_path = os.path.join(data_dir, 'data_road')
-    training_labels_count = len(glob(os.path.join(kitti_dataset_path, 'training/gt_image_2/*_road_*.png')))
-    training_images_count = len(glob(os.path.join(kitti_dataset_path, 'training/image_2/*.png')))
-    testing_images_count = len(glob(os.path.join(kitti_dataset_path, 'testing/image_2/*.png')))
+    kitti_dataset_path = os.path.join(data_dir, 'KITTI_SEMANTIC')
+    training_labels_count = len(glob(os.path.join(kitti_dataset_path, 'Training/GT/*.png')))
+    training_images_count = len(glob(os.path.join(kitti_dataset_path, 'Training/RGB/*.png')))
+    testing_images_count = len(glob(os.path.join(kitti_dataset_path, 'Testing/RGB/*.png')))
 
     assert not (training_images_count == training_labels_count == testing_images_count == 0),\
         'Kitti dataset not found. Extract Kitti dataset in {}'.format(kitti_dataset_path)
-    assert training_images_count == 289, 'Expected 289 training images, found {} images.'.format(training_images_count)
-    assert training_labels_count == 289, 'Expected 289 training labels, found {} labels.'.format(training_labels_count)
-    assert testing_images_count == 290, 'Expected 290 testing images, found {} images.'.format(testing_images_count)
+    assert training_images_count == 133, 'Expected 133 training images, found {} images.'.format(training_images_count)
+    assert training_labels_count == 133, 'Expected 133 training labels, found {} labels.'.format(training_labels_count)
+    assert testing_images_count == 10, 'Expected 10 testing images, found {} images.'.format(testing_images_count)
