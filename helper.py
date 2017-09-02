@@ -180,13 +180,19 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
         image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
 
         # Perform segmentation to the test image(add a mask reresenting predictions)
-        im_softmax = sess.run([tf.nn.softmax(logits)],{keep_prob: 1.0, image_pl: [image]})
-        im_softmax = im_softmax[0][:, 1].reshape(image_shape[0], image_shape[1])
-        segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
-        mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
-        mask = scipy.misc.toimage(mask, mode="RGBA")
+        im_softmax = sess.run(tf.nn.softmax(logits), {keep_prob: 1.0, image_pl: [image]})
+	
+        # Image to apply masking on 
         street_im = scipy.misc.toimage(image)
-        street_im.paste(mask, box=None, mask=mask)
+
+        # Applying segmentation coloring
+        for index in range(len(gt_labels)):
+                color_value = gt_labels[index].color_value
+                filtered_softmax = im_softmax[:, index].reshape(image_shape[0], image_shape[1])
+                segmentation = (filtered_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
+                mask = np.dot(segmentation, np.array([[color_value[0], color_value[1], color_value[2], 127]]))
+                mask = scipy.misc.toimage(mask, mode="RGBA")
+                street_im.paste(mask, box=None, mask=mask)
 
         # Add the prediction to the folder
         yield os.path.basename(image_file), np.array(street_im)

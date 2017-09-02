@@ -190,8 +190,8 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 75
-    batch_size = 5
+    epochs = 100
+    batch_size = 10
     lr = 0.0001
     learning_rate = tf.constant(lr)
 
@@ -231,7 +231,7 @@ def run():
                  cross_entropy_loss, vgg_input, correct_label, keep_prob, lr)
 
         # Save the inference data from the run
-        #save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
+        save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
 
         # OPTIONAL: Apply the trained model to a video
 
