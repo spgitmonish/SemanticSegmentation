@@ -4,3 +4,4 @@ gtFine_trainvaltest/
 
 vgg16.npy
 KITTI_SEMANTIC/
+CityScapes

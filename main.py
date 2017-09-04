@@ -180,6 +180,8 @@ def run():
     image_shape = (160, 576)
     data_dir = './data'
     runs_dir = './runs'
+    
+    # NOTE: This test applies only for the kitti dataset under data_road(not applicable to kitti_sem branch)
     tests.test_for_kitti_dataset(data_dir)
 
     # Download pretrained vgg model
@@ -190,8 +192,13 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 100
-    batch_size = 10
+    if DATASET_TO_USE == 1:
+        epochs = 100
+        batch_size = 10
+    elif DATASET_TO_USE == 2:
+        epochs = 1
+        batch_size = 10
+
     lr = 0.0001
     learning_rate = tf.constant(lr)
 
@@ -203,14 +210,20 @@ def run():
         vgg_path = os.path.join(data_dir, 'vgg')
 
         # Seperate the training image set into training and validation sets
-        validation_path, training_path, label_path = load_data(os.path.join(data_dir, 'KITTI_SEMANTIC/Training'), 0.1)
+        if DATASET_TO_USE == 1:
+            validation_path, training_path, label_path = load_kitti_sem_data(os.path.join(data_dir, 'KITTI_SEMANTIC/Training'), 0.1)
 
-        # Create function to get batches for validation and training
-        get_validation_batches_fn = helper.gen_batch_function(validation_path, label_path, image_shape)
-        get_training_batches_fn = helper.gen_batch_function(training_path, label_path, image_shape)
+            # Create function to get batches for validation and training
+            get_validation_batches_fn = helper.gen_batch_function(validation_path, label_path, image_shape, None)
+            get_training_batches_fn = helper.gen_batch_function(training_path, label_path, image_shape, None)
+        elif DATASET_TO_USE == 2:
+            validation_path, training_path = load_city_scapes_data(os.path.join(data_dir, 'CityScapes'))
 
-        # OPTIONAL: Augment Images for better results
-        #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
+            # Create function to get batches for validation and training
+            get_validation_batches_fn = helper.gen_batch_function(validation_path, None, image_shape, 'val')
+            get_training_batches_fn = helper.gen_batch_function(training_path, None, image_shape, 'train')
+        else:
+            raise RuntimeError('DATASET_TO_USE set incorrectly for "load_data" function call')
 
         # Build NN using load_vgg, layers, and optimize function
         # Placeholder for model training(batch size, shape[0], shape[1], num_classes)
@@ -231,8 +244,10 @@ def run():
                  cross_entropy_loss, vgg_input, correct_label, keep_prob, lr)
 
         # Save the inference data from the run
-        save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
-
+        if DATASET_TO_USE == 1:
+            save_inference_kitti_sem_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
+        elif DATASET_TO_USE == 2:
+            save_inference_city_scapes_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, vgg_input, 'FINAL')
         # OPTIONAL: Apply the trained model to a video
 
 if __name__ == '__main__':
