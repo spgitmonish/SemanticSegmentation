@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 # Flag to dictate whether to use KITTI_SEMANTIC dataset or City Scapes 
 # NOTE: 1 represents KITTI_SEMANTIC and 2 represents City Scapes
-DATASET_TO_USE = 1
+DATASET_TO_USE = 2
  
 # NOTE: A named tuple is a tuple which allows access of it's elements by name
 # Named tuple object where each entry has the following:
@@ -368,29 +368,14 @@ def save_inference_city_scapes_samples(runs_dir, data_dir, sess, image_shape,
 
     # Run NN on test images and save them to disk
     print('Epoch {} finished. Saving test images to: {}'.format(epoch, output_dir))
-    image_outputs = gen_test_city_scapes_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'KITTI_SEMANTIC/Testing'), image_shape)
+    image_outputs = gen_test_city_scapes_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'CityScapes'), image_shape)
 
-    # Save the image output
-    for name, image in image_outputs:
-        scipy.misc.imsave(os.path.join(output_dir, os.path.basename(name)), image)
-        # Get parts of the image file path
-        image_file_parts = Path(name).parts
-        # Get the splits of the image file path
-        # NOTE: The last 4 parts are specific to the image file i.e. ../leftImg8bit/train/<city>/<filename>
-        image_file_splits = '/'.join(image_file_parts[:-4])
-        # Add the extra './' at the beginning
-        image_file_splits = './' + image_file_splits
-        # Compose the path for accessing the ground truth images for the corresponding city
-        label_path = os.path.join(image_file_splits, ('gtFine' + '/' + data_type + '/'))
-        label_path = os.path.join(label_path, image_file_parts[-2])
-        # Get the image file name and replace it with the corresponding label name
-        image_file_name = os.path.basename(image_file)
-        label_file_name = image_file_name.replace('leftImg8bit', 'gtFine_color')
-        # Path to the corresponding label image
-        gt_image_file = os.path.join(label_path, label_file_name)
-        gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
-        # Save the label image for comparison
-        scipy.misc.imsave(os.path.join(output_dir, os.path.basename(gt_image_file)), gt_image)
+    # Save the segmentation output and the actual segmentation of the test image
+    for image_file_path, image in image_outputs:
+        scipy.misc.imsave(os.path.join(output_dir, os.path.basename(image_file_path)), image)
+        gt_file_path = os.path.dirname(image_file_path).replace('leftImg8bit', 'gtFine')
+        gt_file_name = os.path.basename(image_file_path).replace('leftImg8bit', 'gtFine_color')
+        shutil.copy(os.path.join(gt_file_path, gt_file_name), os.path.join(output_dir, gt_file_name))
     
     # Save the model
     saver = tf.train.Saver()

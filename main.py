@@ -217,7 +217,7 @@ def run():
             get_validation_batches_fn = helper.gen_batch_function(validation_path, label_path, image_shape, None)
             get_training_batches_fn = helper.gen_batch_function(training_path, label_path, image_shape, None)
         elif DATASET_TO_USE == 2:
-            validation_path, training_path = load_city_scapes_data(os.path.join(data_dir, 'CityScapes'))
+            validation_path, training_path = load_city_scapes_data(os.path.join(data_dir, 'SmallCityScapes'))
 
             # Create function to get batches for validation and training
             get_validation_batches_fn = helper.gen_batch_function(validation_path, None, image_shape, 'val')
