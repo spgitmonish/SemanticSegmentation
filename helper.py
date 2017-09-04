@@ -292,8 +292,14 @@ def gen_test_city_scapes_output(sess, logits, keep_prob, image_pl, data_folder, 
     testing_image_paths = glob(os.path.join(data_folder, 'leftImg8bit/test/', '**/*.png'))
     random.shuffle(testing_image_paths)
 
-    for image_file in testing_image_paths[:20]:
-        # Resize the image to the input image size
+    for index in range(0, 20):
+		# Get a random index from the test image set
+        rand_test_index = np.random.randint(0, len(testing_image_paths))
+        
+		# Image file from the set 
+        image_file = testing_image_paths[rand_test_index]
+
+		# Resize the image to the input image size
         image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
 
         # Perform segmentation to the test image(add a mask reresenting predictions)
@@ -370,13 +376,10 @@ def save_inference_city_scapes_samples(runs_dir, data_dir, sess, image_shape,
     print('Epoch {} finished. Saving test images to: {}'.format(epoch, output_dir))
     image_outputs = gen_test_city_scapes_output(sess, logits, keep_prob, input_image, os.path.join(data_dir, 'CityScapes'), image_shape)
 
-    # Save the segmentation output and the actual segmentation of the test image
+    # Save the segmentation output and the actual test image
     for image_file_path, image in image_outputs:
         scipy.misc.imsave(os.path.join(output_dir, os.path.basename(image_file_path)), image)
-        gt_file_path = os.path.dirname(image_file_path).replace('leftImg8bit', 'gtFine')
-        gt_file_name = os.path.basename(image_file_path).replace('leftImg8bit', 'gtFine_color')
-        shutil.copy(os.path.join(gt_file_path, gt_file_name), os.path.join(output_dir, gt_file_name))
-    
+        
     # Save the model
     saver = tf.train.Saver()
     filefcn_path = os.path.join(output_dir, 'fcn-{}.ckpt'.format(epoch))

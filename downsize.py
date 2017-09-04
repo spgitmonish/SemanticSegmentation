@@ -89,7 +89,7 @@ def run():
 
 			# Pick random validation images till the count of 100 is met
 			for index in range(0, 100):
-				# Get a random index from the training image set
+				# Get a random index from the validation image set
 				rand_valid_index = np.random.randint(0, len(validation_image_paths))
 
 				# Validation image file path

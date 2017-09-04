@@ -196,7 +196,7 @@ def run():
         epochs = 100
         batch_size = 10
     elif DATASET_TO_USE == 2:
-        epochs = 1
+        epochs = 100
         batch_size = 10
 
     lr = 0.0001
