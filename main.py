@@ -192,12 +192,8 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    if DATASET_TO_USE == 1:
-        epochs = 100
-        batch_size = 10
-    elif DATASET_TO_USE == 2:
-        epochs = 100
-        batch_size = 10
+    epochs = 100
+    batch_size = 10
 
     lr = 0.0001
     learning_rate = tf.constant(lr)
@@ -237,6 +233,9 @@ def run():
 
         # Get the logits, optimizer and cross entropy loss
         logits, optimizer, cross_entropy_loss = optimize(fcn_output, correct_label, learning_rate, num_classes)
+		
+		# Tensorboard visualization
+        tf.summary.FileWriter('./logs', graph=tf.get_default_graph())
 
         # Train NN using the train_nn function
         train_nn(sess, epochs, batch_size,

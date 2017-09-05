@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 # Flag to dictate whether to use KITTI_SEMANTIC dataset or City Scapes 
 # NOTE: 1 represents KITTI_SEMANTIC and 2 represents City Scapes
-DATASET_TO_USE = 2
+DATASET_TO_USE = 1
  
 # NOTE: A named tuple is a tuple which allows access of it's elements by name
 # Named tuple object where each entry has the following:
