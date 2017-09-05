@@ -107,7 +107,11 @@ def test_train_nn(train_nn):
     epochs = 1
     batch_size = 2
 
-    def get_batches_fn(batach_size_parm):
+    def get_validation_batches_fn(batach_size_parm):
+        shape = [batach_size_parm, 2, 3, 3]
+        return np.arange(np.prod(shape)).reshape(shape)
+
+    def get_training_batches_fn(batach_size_parm):
         shape = [batach_size_parm, 2, 3, 3]
         return np.arange(np.prod(shape)).reshape(shape)
 
@@ -122,7 +126,8 @@ def test_train_nn(train_nn):
             'sess': sess,
             'epochs': epochs,
             'batch_size': batch_size,
-            'get_batches_fn': get_batches_fn,
+            'get_validation_batches_fn': get_validation_batches_fn,
+            'get_training_batches_fn': get_training_batches_fn,
             'train_op': train_op,
             'cross_entropy_loss': cross_entropy_loss,
             'input_image': input_image,

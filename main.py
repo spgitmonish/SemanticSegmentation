@@ -65,9 +65,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # Freeze training of layers in VGG-16
-    vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
+    '''vgg_layer3_out = tf.stop_gradient(vgg_layer3_out)
     vgg_layer4_out = tf.stop_gradient(vgg_layer4_out)
-    vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)
+    vgg_layer7_out = tf.stop_gradient(vgg_layer7_out)'''
 
     # Build FCN-8 decoder using upsampling and adding skip connections
     # First make sure that the output shape is same(apply 1x1 convolution)
@@ -75,6 +75,9 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     vgg_layer4_logits = tf.layers.conv2d(vgg_layer4_out, num_classes, kernel_size=1, name='vgg_layer4_logits')
     vgg_layer3_logits = tf.layers.conv2d(vgg_layer3_out, num_classes, kernel_size=1, name='vgg_layer3_logits')
 
+    # NOTE: The factor of upsampling is equal to the stride of transposed convolution.
+    #       The kernel size of the upsampling operation is determined by the identity:
+    #       2 * factor - factor % 2.
     # Upsample the output of 1x1 convolution output(start of the decoding process)
     fcn_1 = tf.layers.conv2d_transpose(vgg_layer7_logits, num_classes, kernel_size=4, strides=(2, 2), padding='same', name='fcn_1')
 
@@ -118,15 +121,16 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     return logits, optimizer, cross_entropy_loss
 tests.test_optimize(optimize)
 
-def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
-             cross_entropy_loss, input_image,
-             correct_label, keep_prob, learning_rate):
+def train_nn(sess, epochs, batch_size,
+             get_validation_batches_fn, get_training_batches_fn, train_op,
+             cross_entropy_loss, input_image, correct_label, keep_prob, learning_rate):
     """
     Train neural network and print out the loss during training.
     :param sess: TF Session
     :param epochs: Number of epochs
     :param batch_size: Batch size
-    :param get_batches_fn: Function to get batches of training data.  Call using get_batches_fn(batch_size)
+    :param get_validation_batches_fn: Function to get batches of validation data.
+    :param get_training_batches_fn: Function to get batches of training data.
     :param train_op: TF Operation to train the neural network
     :param cross_entropy_loss: TF Tensor for the amount of loss
     :param input_image: TF Placeholder for input images
@@ -134,28 +138,39 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
     :param keep_prob: TF Placeholder for dropout keep probability
     :param learning_rate: TF Placeholder for learning rate
     """
-    # To keep track of epoch time
-    t = time.time()
-
     # Initialize all the global variables
     sess.run(tf.global_variables_initializer())
 
     # Run for a certain number of epochs
     for epoch in range(epochs):
         print("Epoch: ", epoch)
+        t = time.time()
 
-        # Train on batches(1 image)
+        # Train on batches
         training_loss = 0
         training_samples = 0
-        for X, y in get_batches_fn(batch_size):
+        for X, y in get_training_batches_fn(batch_size):
             training_samples += len(X)
-            loss, _ = sess.run([cross_entropy_loss, train_op], feed_dict={input_image: X, correct_label: y, keep_prob: 0.8})
+            loss, _ = sess.run([cross_entropy_loss, train_op], feed_dict={input_image: X, correct_label: y, keep_prob: 0.5})
             training_loss += loss
 
         # Calculate training loss
         training_loss /= training_samples
-        print("Training loss: {}".format(training_loss))
-        
+
+        # Validation on batches
+        validation_loss = 0
+        validation_samples = 0
+        for X, y in get_validation_batches_fn(batch_size):
+            validation_samples += len(X)
+            loss = sess.run(cross_entropy_loss, feed_dict={input_image: X, correct_label: y, keep_prob: 1.0})
+            validation_loss += loss
+
+        # Calculate training loss
+        validation_loss /= validation_samples
+
+        # Print out the stats
+        print("Training loss: {}".format(training_loss) + " Validation loss: {}".format(validation_loss))
+
         # Print time taken
         print("Time: %.3f seconds" % (time.time() - t))
 tests.test_train_nn(train_nn)
@@ -175,8 +190,8 @@ def run():
     #  https://www.cityscapes-dataset.com/
 
     # Hyperparameters for training
-    epochs = 1
-    batch_size = 1
+    epochs = 75
+    batch_size = 5
     lr = 0.0001
     learning_rate = tf.constant(lr)
 
@@ -187,8 +202,12 @@ def run():
         # Path to vgg model
         vgg_path = os.path.join(data_dir, 'vgg')
 
-        # Create function to get batches
-        get_batches_fn = helper.gen_batch_function(os.path.join(data_dir, 'data_road/training'), image_shape)
+        # Seperate the training image set into training and validation sets
+        validation_path, training_path, label_path = load_data(os.path.join(data_dir, 'data_road/training'), 0.1)
+
+        # Create function to get batches for validation and training
+        get_validation_batches_fn = helper.gen_batch_function(validation_path, label_path, image_shape)
+        get_training_batches_fn = helper.gen_batch_function(training_path, label_path, image_shape)
 
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
@@ -207,7 +226,8 @@ def run():
         logits, optimizer, cross_entropy_loss = optimize(fcn_output, correct_label, learning_rate, num_classes)
 
         # Train NN using the train_nn function
-        train_nn(sess, epochs, batch_size, get_batches_fn, optimizer,
+        train_nn(sess, epochs, batch_size,
+                 get_validation_batches_fn, get_training_batches_fn, optimizer,
                  cross_entropy_loss, vgg_input, correct_label, keep_prob, lr)
 
         # Save the inference data from the run
