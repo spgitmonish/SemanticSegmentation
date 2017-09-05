@@ -17,9 +17,9 @@ at UC Berkeley https://arxiv.org/pdf/1411.4038.pdf. The idea behind FCN is repre
 
 FCNs are designed to work on input images of any size and produces an output of the same spatial dimensions. In this project I attempted on 3 different datasets.
 
-1. Kitti Road dataset
-2. Kitti Semantic dataset
-3. City Scapes dataset
+1. Kitti Road dataset(Main)
+2. Kitti Semantic dataset(Experiment)
+3. City Scapes dataset(Experiment)
 
 ### Architecture Overview
 Typically recognition networks(CNNs) take a fixed sized input and produces non-spatial outputs. Networks like LeNet, AlexNet and VGG are examples of highly accurate networks. The fully connected layers in CNNs can be viewed as convolutions with kernels that cover entire input regions. Doing so casts them into FCNs which take inputs of any size and outputs classification maps.
@@ -54,21 +54,38 @@ Make sure you have the following is installed:
  - [NumPy](http://www.numpy.org/)
  - [SciPy](https://www.scipy.org/)
 
-#### Dataset
+#### Main Dataset
 Download the [Kitti Road dataset](http://www.cvlibs.net/datasets/kitti/eval_road.php) from [here](http://www.cvlibs.net/download.php?file=data_road.zip).  Extract the dataset in the `data` folder.  This will create the folder `data_road` with all the training a test images.
 
-### Start
-##### Implement
-Implement the code in the `main.py` module indicated by the "TODO" comments.
-The comments indicated with "OPTIONAL" tag are not required to complete.
-##### Run
-Run the following command to run the project:
-```
-python main.py
-```
-**Note** If running this in Jupyter Notebook system messages, such as those regarding test status, may appear in the terminal rather than the notebook.
+> **NOTE:**
+> The solution in the 'master/hyperparameters' branches is purely based on the dataset described above and doesn't apply to the 'kitti_sem' branch
 
-### Submission
+#### Experimental Dataset
+> **NOTE:**
+> The dataset below is for all the experimentation I did in the 'kitti_sem' branch of the repository. DON'T MERGE kitti_sem to the main branch if you are cloning this repository.
+
+1. The first experimental dataset is the modified version found at this website: http://adas.cvc.uab.es/s2uad/?page_id=11. The modified version can be downloaded from my personal google drive link https://drive.google.com/open?id=0B8AaPRcssKT6MnNGNlg1TW1nQjA. This dataset needs to be under the data folder.
+
+2. The second experimental dataset(gtFine_trainvaltest.zip and leftImg8bit_trainvaltest.zip) can be found at https://www.cityscapes-dataset.com/downloads/. This dataset is huge and I wrote a little script uses 900 samples for training and 100 samples for validation. More on that in the "Experimental Analysis" section below.
+
+#### Code
+The code is in the following files:
+- `helper.py`
+- `main.py`
+- `project_tests.py`
+
+The core logic for building and running the model is in main.py and helper.py with sanity checks logic in project_tests.py.
+
+#### Run
+Run the following command to run the project:
+
+`python main.py`
+
+>**NOTE:** If running this in Jupyter Notebook system messages, such as those regarding test status, may appear in the terminal rather than the notebook.
+
+#### Main Analysis
+
+##### Submission
 1. Ensure you've passed all the unit tests.
 2. Ensure you pass all points on [the rubric](https://review.udacity.com/#!/rubrics/989/view).
 3. Submit the following in a zip file.
