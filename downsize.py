@@ -51,14 +51,15 @@ def run():
 
 			# Randomly shuffle before copying images
 			random.shuffle(training_image_paths)
+			
+			# Generate a list of 900 unique numbers in range(1, len(training_image_paths)
+			rand_train_index_list = random.sample(range(0, len(training_image_paths)), 900)
 
-			# Pick random training images till the count of 900 is met
-			for index in range(0, 900):
-				# Get a random index from the training image set
-				rand_train_index = np.random.randint(0, len(training_image_paths))
-
+			# Pick random training images till the list of count 900 is exhausted
+			for rand_train_index in rand_train_index_list:
 				# Training image file path
 				image_file_path = training_image_paths[rand_train_index]
+
 				# Downsize image file path for training
 				downsize_image_file_path = image_file_path.replace('CityScapes', 'SmallCityScapes')
 				shutil.copy(image_file_path, downsize_image_file_path)
@@ -67,6 +68,7 @@ def run():
 				label_dir_path = os.path.dirname(image_file_path).replace('leftImg8bit', 'gtFine')
 				label_file_name = os.path.basename(image_file_path).replace('leftImg8bit', 'gtFine_color')
 				label_file_path = os.path.join(label_dir_path, label_file_name)
+
 				# Downsize label file path
 				downsize_label_file_path = label_file_path.replace('CityScapes', 'SmallCityScapes')
 				shutil.copy(label_file_path, downsize_label_file_path)	
@@ -87,13 +89,14 @@ def run():
 			# Randomly shuffle before copying images
 			random.shuffle(validation_image_paths)
 
-			# Pick random validation images till the count of 100 is met
-			for index in range(0, 100):
-				# Get a random index from the validation image set
-				rand_valid_index = np.random.randint(0, len(validation_image_paths))
+			# Generate a list of 100 unique numbers in range(1, len(validation_image_paths)
+			rand_valid_index_index_list = random.sample(range(0, len(validation_image_paths)), 100)
 
+			# Pick random training images till the list of count 900 is exhausted
+			for rand_valid_index in rand_valid_index_index_list:
 				# Validation image file path
 				image_file_path = validation_image_paths[rand_valid_index]
+
 				# Downsize image file path for validation
 				downsize_image_file_path = image_file_path.replace('CityScapes', 'SmallCityScapes')
 				shutil.copy(image_file_path, downsize_image_file_path)
@@ -102,6 +105,7 @@ def run():
 				label_dir_path = os.path.dirname(image_file_path).replace('leftImg8bit', 'gtFine')
 				label_file_name = os.path.basename(image_file_path).replace('leftImg8bit', 'gtFine_color')
 				label_file_path = os.path.join(label_dir_path, label_file_name)
+
 				# Downsize label file path
 				downsize_label_file_path = label_file_path.replace('CityScapes', 'SmallCityScapes')
 				shutil.copy(label_file_path, downsize_label_file_path)
