@@ -15,7 +15,7 @@ at UC Berkeley. The idea behind FCN is represented by the image below.
    <i>Figure 1: Fully Convolutional Network</i>
 </p>
 
-FCNs are designed to work on input images of any size and produces an output of the same spatial dimensions. In this project I attempted on 3 different datasets.
+FCNs are designed to work on input images of any size and produces an output of the same spatial dimensions. In this project I attempted FCN on 3 different datasets.
 
 1. Kitti Road dataset(Main)
 2. Kitti Semantic dataset(Experiment)
@@ -46,6 +46,8 @@ The final architecture I designed for this project uses a VGG-16 Convnet trained
    <i>Figure 3: FCN-8 model</i>
 </p>
 
+> **NOTE**: Pixelwise cross entropy loss function and adam optimizer was used for all the runs/experiments described in the remaining sections  
+
 ### Setup
 #### Frameworks and Packages
 Make sure you have the following is installed:
@@ -65,9 +67,9 @@ Download the [Kitti Road dataset](http://www.cvlibs.net/datasets/kitti/eval_road
 > **NOTE:**
 > The datasets below are for the experiments I did in the 'kitti_sem' branch of the repository. DON'T MERGE 'kitti_sem' to the 'master' branch if you are cloning this repository.
 
-1. The first experimental dataset is the modified version found [here](http://adas.cvc.uab.es/s2uad/?page_id=11). The modified version can be downloaded from my personal google drive [link](https://drive.google.com/open?id=0B8AaPRcssKT6MnNGNlg1TW1nQjA). This dataset needs to be under the data folder under the folder name 'KITTI_SEMANTIC'.
+1. The first experimental dataset is the modified version found [here](http://adas.cvc.uab.es/s2uad/?page_id=11). The modified version can be downloaded from my personal google drive [link](https://drive.google.com/open?id=0B8AaPRcssKT6MnNGNlg1TW1nQjA). This dataset needs to be under the `data` folder under the folder name `KITTI_SEMANTIC`.
 
-2. The second experimental dataset(gtFine\_trainvaltest.zip and leftImg8bit\_trainvaltest.zip) can be found [here](https://www.cityscapes-dataset.com/downloads/). This dataset is huge and I wrote a little script which create 900 samples for training and 100 samples for validation. More on that in the "Experimental Analysis" section below.
+2. The second experimental dataset(gtFine\_trainvaltest.zip and leftImg8bit\_trainvaltest.zip) can be found [here](https://www.cityscapes-dataset.com/downloads/). This dataset is huge and I wrote a little script which creates 900 samples for training and 100 samples for validation. More on that in the "Experimental Analysis" section below.
 
 #### Code
 The code is in the following files:
@@ -111,10 +113,10 @@ Here are some test images which are outputted by the model.
 As one can see above the model does pretty well in classifying road pixels vs non-road pixels. There are still some cases when the lighting conditions is different, the semantic segmentation is not great. The model can definitely be made robust by adding more augmentation techniques and having a bigger dataset with varying lighting conditions and situations.
 
 #### Experimental Analysis
-Although the original goal of this project was to test the model on the Kitti Road dataset, I decided to go a step further and explore two other datasets
+Although the original goal of this project was to test the model on the Kitti Road dataset, I decided to go a step further and explore two other datasets.
 
 ##### 1. Kitti Semantic
-I found this [dataset](http://adas.cvc.uab.es/s2uad/) while I was reading about semantic segmentation. This dataset is hosted by the researchers of the [WAV Paper](http://adas.cvc.uab.es/s2uad/wp-content/uploads/2014/06/PID3467657.pdf) The dataset is smaller in size when compared to the Kitti Road dataset. 
+I found this [dataset](http://adas.cvc.uab.es/s2uad/) while I was reading about semantic segmentation. This dataset is hosted by the researchers of the [WAV Paper](http://adas.cvc.uab.es/s2uad/wp-content/uploads/2014/06/PID3467657.pdf). The dataset is smaller in size when compared to the Kitti Road dataset(143 total samples). 
 
 The original dataset only had training and validation images. But to better test my model, I created a [custom dataset](https://drive.google.com/open?id=0B8AaPRcssKT6MnNGNlg1TW1nQjA) based on the original dataset. The custom dataset divides the original set into training and testing subsets. With my code taking care of the splits into training and validation during model training. 
 
@@ -153,7 +155,7 @@ The training time for each epoch was definitely higher even on the downsized dat
    <i>Figure 8: City Scapes Loss</i>
 </p>
 
-With a validation loss of ~9% at the end of training, the model output looked as shown below.
+With a validation loss of ~9% at the end of training, the model outputted the following on test samples.
 
 ![](images/CityScapesSamples/berlin_000049_000019_leftImg8bit.png)  |  ![](images/CityScapesSamples/munich_000022_000019_leftImg8bit.png)
 | ------------------------- | ------------------------- |
@@ -162,7 +164,7 @@ With a validation loss of ~9% at the end of training, the model output looked as
    <i>Figure 9: City Scapes Test</i>
 </p>
 
-One thing to notice is that the model in unable to semantically segment buildigin. The color white is supposed to represent 'Unclassified' and charcoal is supposed to represent 'Buildings'. And in the test examples shown above buildings are colored white representing 'Unclassified'. I attribute this to the downsizing of the dataset and the model not having enough samples to learn from. Using my model on the entire dataset would have definitely led to accurate semantic segmentation on images.
+One thing to notice is that the model in unable to semantically segment buildings. The color white is supposed to represent 'Unclassified' and charcoal is supposed to represent 'Buildings'. And in the test examples shown above buildings are colored white representing 'Unclassified'. I attribute this to the downsizing of the dataset and the model not having enough samples to learn from. Using my model on the entire dataset would definitely lead to higher accuracy of semantic segmentation on images.
 
 ## Final thoughts
 This was a really fun project to work on and I learnt a lot about the cutting edge work being done in the field of Deep Learning. Although the model performs really well, the robustness could be improved(data augmentation, regularization etc).
